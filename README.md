@@ -54,9 +54,9 @@ services:
   backup:
     image: futurice/docker-volume-backup:2.0.0
     environment:
-      AWS_S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}   # Read AWS secrets from environment (or a .env file)
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}   # Read AWS secrets from environment (or a .env file)
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
     volumes:
       - grafana-data:/backup/grafana-data:ro    # Mount the Grafana data volume (as read-only)
 
@@ -88,9 +88,9 @@ services:
   backup:
     image: futurice/docker-volume-backup:2.0.0
     environment:
-      AWS_S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}   # Read AWS secrets from environment (or a .env file)
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}   # Read AWS secrets from environment (or a .env file)
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # Allow use of the "stop-during-backup" feature
       - grafana-data:/backup/grafana-data:ro    # Mount the Grafana data volume (as read-only)
@@ -148,10 +148,10 @@ Variable | Default | Notes
 `BACKUP_ARCHIVE` | `/archive` | When this path is available within the container (i.e. you've mounted a Docker volume there), a finished backup file will get archived there after each run.
 `BACKUP_WAIT_SECONDS` | `0` | The backup script will sleep this many seconds between re-starting stopped containers, and proceeding with archiving/uploading the backup. This can be useful if you don't want the load/network spike of a large upload immediately after the load/network spike of container startup.
 `BACKUP_HOSTNAME` | `$(hostname)` | Name of the host (i.e. Docker container) in which the backup runs. Mostly useful if you want a specific hostname to be associated with backup metrics (see InfluxDB support).
-`AWS_S3_BUCKET_NAME` |  | When provided, the resulting backup file will be uploaded to this S3 bucket after the backup has ran.
-`AWS_ACCESS_KEY_ID` |  | Required when using `AWS_S3_BUCKET_NAME`.
-`AWS_SECRET_ACCESS_KEY` |  | Required when using `AWS_S3_BUCKET_NAME`.
-`AWS_DEFAULT_REGION` |  | Optional when using `AWS_S3_BUCKET_NAME`. Allows you to override the AWS CLI default region. Usually not needed.
+`S3_BUCKET_NAME` |  | When provided, the resulting backup file will be uploaded to this S3 bucket after the backup has ran.
+`S3_ACCESS_KEY_ID` |  | Required when using `S3_BUCKET_NAME`.
+`S3_SECRET_ACCESS_KEY` |  | Required when using `S3_BUCKET_NAME`.
+`S3_DEFAULT_REGION` |  | Optional when using `S3_BUCKET_NAME`. Allows you to override the AWS CLI default region. Usually not needed.
 `INFLUXDB_URL` |  | When provided, backup metrics will be sent to an InfluxDB instance at this URL, e.g. `https://influxdb.example.com`.
 `INFLUXDB_DB` |  | Required when using `INFLUXDB_URL`; e.g. `my_database`.
 `INFLUXDB_CREDENTIALS` |  | Required when using `INFLUXDB_URL`; e.g. `user:pass`.
@@ -176,36 +176,6 @@ time_upload=0.56016993522644
 If so configured, they can also be shipped to an InfluxDB instance. This allows you to set up monitoring and/or alerts for them. Here's a sample visualization on Grafana:
 
 ![Backup dashboard sample](doc/backup-dashboard-sample.png)
-
-## S3 Bucket setup
-
-Amazon S3 has [Versioning](https://docs.aws.amazon.com/AmazonS3/latest/dev/Versioning.html) and [Object Lifecycle Management](https://docs.aws.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html) features that can be useful for backups.
-
-First, you can enable versioning for your backup bucket:
-
-![S3 versioning](doc/s3-versioning.png)
-
-Then, you can change your backup filename to a static one, for example:
-
-```yml
-environment:
-  BACKUP_FILENAME: latest.tar.gz
-```
-
-This allows you to retain previous versions of the backup file, but the _most recent_ version is always available with the same filename:
-
-    $ aws s3 cp s3://my-backup-bucket/latest.tar.gz .
-    download: s3://my-backup-bucket/latest.tar.gz to ./latest.tar.gz
-
-To make sure your bucket doesn't continue to grow indefinitely, you can enable some lifecycle rules:
-
-![S3 lifecycle](doc/s3-lifecycle.png)
-
-These rules will:
-
-- Move non-latest backups to a cheaper, long-term storage class ([Glacier](https://aws.amazon.com/glacier/))
-- Permanently remove backups after a year
-- Still always keep the latest backup available (even after a year has passed)
 
 ## Testing
 
