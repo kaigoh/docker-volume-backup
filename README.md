@@ -26,7 +26,7 @@ services:
       - grafana-data:/var/lib/grafana           # This is where Grafana keeps its data
 
   backup:
-    image: futurice/docker-volume-backup:2.0.0
+    image: kaigoh/docker-volume-backup:latest
     volumes:
       - grafana-data:/backup/grafana-data:ro    # Mount the Grafana data volume (as read-only)
       - ./backups:/archive                      # Mount a local folder as the backup archive
@@ -52,7 +52,7 @@ services:
       - grafana-data:/var/lib/grafana           # This is where Grafana keeps its data
 
   backup:
-    image: futurice/docker-volume-backup:2.0.0
+    image: kaigoh/docker-volume-backup:latest
     environment:
       S3_ENDPOINT: https://my-s3-server.example.com # S3 endpoint; leave blank to use AWS
       S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
@@ -87,7 +87,7 @@ services:
       - "docker-volume-backup.stop-during-backup=true"
 
   backup:
-    image: futurice/docker-volume-backup:2.0.0
+    image: kaigoh/docker-volume-backup:latest
     environment:
       S3_ENDPOINT: https://my-s3-server.example.com # S3 endpoint; leave blank to use AWS
       S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
@@ -123,7 +123,7 @@ services:
       - docker-volume-backup.exec-post-backup=rm -rfv /tmp/influxdb
 
   backup:
-    image: futurice/docker-volume-backup:2.0.0
+    image: kaigoh/docker-volume-backup:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro # Allow use of the "pre/post exec" feature
       - influxdb-temp:/backup/influxdb:ro       # Mount the temp space so it gets backed up
@@ -191,6 +191,6 @@ Some cases may need secrets available in the environment, e.g. for S3 uploads to
 
 ## Building
 
-New images can be conveniently built on [Docker Hub](https://hub.docker.com/r/futurice/docker-volume-backup/~/settings/automated-builds/). Update the tag name, save, and use the "Trigger" button:
+New images can be conveniently built on [Docker Hub](https://hub.docker.com/r/kaigoh/docker-volume-backup/~/settings/automated-builds/). Update the tag name, save, and use the "Trigger" button:
 
 ![Docker Hub build](doc/docker-hub-build.png)
