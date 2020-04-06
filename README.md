@@ -54,6 +54,7 @@ services:
   backup:
     image: futurice/docker-volume-backup:2.0.0
     environment:
+      S3_ENDPOINT: https://my-s3-server.example.com # S3 endpoint; leave blank to use AWS
       S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}   # Read AWS secrets from environment (or a .env file)
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
@@ -88,6 +89,7 @@ services:
   backup:
     image: futurice/docker-volume-backup:2.0.0
     environment:
+      S3_ENDPOINT: https://my-s3-server.example.com # S3 endpoint; leave blank to use AWS
       S3_BUCKET_NAME: my-backup-bucket      # S3 bucket which you own, and already exists
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}   # Read AWS secrets from environment (or a .env file)
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
